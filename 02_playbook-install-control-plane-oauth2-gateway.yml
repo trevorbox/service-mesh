@@ -1,0 +1,59 @@
+- name: Install Oauth2 Gateway Service Mesh Control Plane
+  hosts: localhost
+  gather_facts: no
+  vars:
+    - control_plane_namespace: istio-system
+    - control_plane_src_dir: control-plane
+    - redirect_url: https://api-istio-system.apps.cluster-77f0.77f0.sandbox1435.opentlc.com/oauth2/callback
+    - oidc_issuer_url: https://dev-338970.okta.com/oauth2/default
+    - cookie_secret: GRerqX0kInomjzMYFr50wA==
+    - control_plane_name: oauth2-mtls-install
+  tasks:
+    - name: Fail if client_id or client_secret is unset
+      fail:
+        msg: "Please pass client_id and client_secret vars for Okta configuration"
+      when: client_id is not defined or client_secret is not defined
+
+    - name: Create a k8s namespace
+      k8s:
+        name: "{{ control_plane_namespace }}"
+        api_version: v1
+        kind: Namespace
+        state: present
+
+    - name: Deploy Service Mesh Control Plane
+      k8s:
+        state: present
+        namespace: "{{ control_plane_namespace }}"
+        definition: "{{ lookup('template', '{{ control_plane_src_dir }}/oauth2-gateway/templates/ServiceMeshControlPlaneOauth2Proxy.j2') }}"
+
+    - name: Deploy Route
+      k8s:
+        state: present
+        namespace: "{{ control_plane_namespace }}"
+        src: "{{ control_plane_src_dir }}/oauth2-gateway/APIRoute.yml"
+
+    - name: Discover common service mesh objects
+      find:
+        paths: "{{ control_plane_src_dir }}"
+        patterns: "*.yml,*.yaml"
+      register: sm_files
+
+    - name: Deploy common service mesh objects
+      k8s:
+        state: present
+        namespace: "{{ control_plane_namespace }}"
+        src: "{{ item.path }}"
+      loop: "{{ sm_files.files }}"
+
+    - name: Wait for successful deployment of Control Plane
+      k8s_info:
+        api_version: maistra.io/v1
+        name: "{{ control_plane_name }}"
+        kind: ServiceMeshControlPlane
+        namespace: "{{ control_plane_namespace }}"
+      register: control_plane_info
+      until: control_plane_info.resources[0].status.annotations.readyComponentCount is defined and control_plane_info.resources[0].status.annotations.readyComponentCount == "9/9"
+      retries: 10
+      delay: 30
+      ignore_errors: true
