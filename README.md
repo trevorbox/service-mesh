@@ -5,16 +5,18 @@
 
 
 ## Install Service Mesh Operators
+
 1. Ensure you are logged in
 ```
 oc login <mycluster>
 ```
 2. Run the playbook
 ```
-ansible-playbook 01_playbook-install-service-mesh.yml
+ansible-playbook 01_playbook-install-service-mesh-operators.yml
 ```
 
 ## Install Control Plane
+
 Choose whether to install the default control plane or oauth2 gateway control plane.
 - Default Control Plane:
    1. Ensure you are logged in
