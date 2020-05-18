@@ -1,0 +1,4 @@
+spec:
+  ingress:
+    enabled: false
+    security: none
