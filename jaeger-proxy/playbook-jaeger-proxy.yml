@@ -22,10 +22,18 @@
         patterns: "*.yml,*.yaml"
       register: app_dir_files
     
-    - name: Deploy jaeger-proxy app
+    - name: Create sa, configmap, route, and service
       k8s:
         state: present
         namespace: "{{ control_plane_namespace }}"
         src: "{{ item.path }}"
       loop: "{{ app_dir_files.files }}"
+    
+    - name: Create deployment
+      vars:
+        - approval_strategy: Automatic
+      k8s:
+        state: present
+        namespace: "{{ control_plane_namespace }}"
+        definition: "{{ lookup('template', 'app/templates/deployment-jaeger-proxy.j2') }}"
 

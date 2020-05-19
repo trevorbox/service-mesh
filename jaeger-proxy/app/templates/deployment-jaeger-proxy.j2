@@ -42,13 +42,13 @@ spec:
             - '--openshift-ca=/etc/configmaps/trusted-ca-bundle/ca-bundle.crt'
             - '--openshift-ca=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt'
             - >-
-              --openshift-sar={"namespace": "istio-system", "resource": "pods",
+              --openshift-sar={"namespace": "{{ control_plane_namespace }}", "resource": "pods",
               "verb": "get"}
             - '--openshift-service-account=jaeger-proxy'
             - '--provider=openshift'
             - '--tls-cert=/etc/tls/private/tls.crt'
             - '--tls-key=/etc/tls/private/tls.key'
-            - '--upstream=http://jaeger-query.istio-system.svc.cluster.local:16686'
+            - '--upstream=http://jaeger-query:16686'
       serviceAccount: jaeger-proxy
       volumes:
         - name: configmap-trusted-ca-bundle
