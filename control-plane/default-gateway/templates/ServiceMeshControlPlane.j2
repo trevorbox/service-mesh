@@ -63,12 +63,12 @@ spec:
       jaeger:
         template: production-elasticsearch
         elasticsearch:
-          nodeCount: 1
-          redundancyPolicy: "ZeroRedundancy"
+          nodeCount: 3
+          redundancyPolicy: "MultipleRedundancy"
           resources:
             requests:
-              cpu: "3"
+              cpu: "1"
               memory: "16Gi"
             limits:
-              cpu: "3"
+              cpu: "1"
               memory: "16Gi"
