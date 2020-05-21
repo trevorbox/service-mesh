@@ -1,0 +1,39 @@
+---
+- name: Install and Configure Jaeger Proxy with Trusted CA
+  hosts: localhost
+  gather_facts: no
+  vars:
+    - control_plane_namespace: istio-system
+    - app_dir: app
+    - patch_dir: patch
+  tasks:
+    - name: Patch Jaeger to disable oauth proxy sidecar and remove route
+      k8s:
+        state: present
+        namespace: "{{ control_plane_namespace }}"
+        merge_type: merge
+        name: jaeger
+        kind: Jaeger
+        src: "{{ patch_dir }}/jaeger-jaeger.yaml" 
+    
+    - name: Discover yml and yaml files in app directory
+      find:
+        paths: "{{ app_dir }}"
+        patterns: "*.yml,*.yaml"
+      register: app_dir_files
+    
+    - name: Create sa, configmap, route, and service
+      k8s:
+        state: present
+        namespace: "{{ control_plane_namespace }}"
+        src: "{{ item.path }}"
+      loop: "{{ app_dir_files.files }}"
+    
+    - name: Create deployment
+      vars:
+        - approval_strategy: Automatic
+      k8s:
+        state: present
+        namespace: "{{ control_plane_namespace }}"
+        definition: "{{ lookup('template', 'app/templates/deployment-jaeger-proxy.j2') }}"
+

@@ -1,0 +1,61 @@
+---
+kind: Deployment
+apiVersion: extensions/v1beta1
+metadata:
+  name: jaeger-proxy 
+  labels:
+    app: jaeger-proxy
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: jaeger-proxy
+    spec:
+      restartPolicy: Always
+      serviceAccountName: jaeger-proxy
+      schedulerName: default-scheduler
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: oauth-proxy
+          resources:
+            requests:
+              cpu: 10m
+              memory: 128Mi
+          ports:
+            - name: jaeger-proxy
+              containerPort: 9091
+              protocol: TCP
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: jaeger-proxy-tls
+              mountPath: /etc/tls/private
+            - name: configmap-trusted-ca-bundle
+              mountPath: /etc/configmaps/trusted-ca-bundle
+          terminationMessagePolicy: File
+          image: 'registry.redhat.io/openshift4/ose-oauth-proxy:latest'
+          args:
+            - '--cookie-secret=zSPwqJFdpS5NwuhPPmnZ+w=='
+            - '--display-htpasswd-form=false'
+            - '-https-address=:9091'
+            - '-http-address='
+            - '--openshift-ca=/etc/configmaps/trusted-ca-bundle/ca-bundle.crt'
+            - '--openshift-ca=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt'
+            - >-
+              --openshift-sar={"namespace": "{{ control_plane_namespace }}", "resource": "pods",
+              "verb": "get"}
+            - '--openshift-service-account=jaeger-proxy'
+            - '--provider=openshift'
+            - '--tls-cert=/etc/tls/private/tls.crt'
+            - '--tls-key=/etc/tls/private/tls.key'
+            - '--upstream=http://jaeger-query:16686'
+      serviceAccount: jaeger-proxy
+      volumes:
+        - name: configmap-trusted-ca-bundle
+          configMap:
+            name: trusted-ca-bundle
+            defaultMode: 420
+        - name: jaeger-proxy-tls
+          secret:
+            secretName: jaeger-proxy-tls
+            defaultMode: 420
