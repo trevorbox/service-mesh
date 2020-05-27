@@ -5,6 +5,7 @@
     - control_plane_namespace: istio-system
     - control_plane_src_dir: control-plane
     - control_plane_name: mtls-install
+    - is_production_deployment: false
   tasks:
     - name: Create a k8s namespace
       k8s:
