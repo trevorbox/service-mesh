@@ -50,11 +50,17 @@ spec:
     tracing:
       enabled: true
       jaeger:
-        template: all-in-one
-        resources:
-          requests:
-            cpu: 10m
-            memory: 128Mi
+        template: production-elasticsearch
+        elasticsearch:
+          nodeCount: 3
+          redundancyPolicy: "MultipleRedundancy"
+          resources:
+            requests:
+              cpu: "1"
+              memory: "16Gi"
+            limits:
+              cpu: "1"
+              memory: "16Gi"
     gateways:
       istio-egressgateway:
         enabled: false
