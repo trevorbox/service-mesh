@@ -58,6 +58,22 @@ spec:
         requests:
           cpu: 10m
           memory: 128Mi
+    {% if is_production_deployment %}
+    tracing:
+      enabled: true
+      jaeger:
+        template: production-elasticsearch
+        elasticsearch:
+          nodeCount: 3
+          redundancyPolicy: "MultipleRedundancy"
+          resources:
+            requests:
+              cpu: "1"
+              memory: "16Gi"
+            limits:
+              cpu: "1"
+              memory: "16Gi"
+    {% else %}
     tracing:
       enabled: true
       jaeger:
@@ -66,3 +82,4 @@ spec:
           requests:
             cpu: 10m
             memory: 128Mi
+    {% endif %}

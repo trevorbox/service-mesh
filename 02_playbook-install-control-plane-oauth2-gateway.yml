@@ -8,6 +8,7 @@
     - oidc_issuer_url: https://dev-338970.okta.com/oauth2/default
     - cookie_secret: GRerqX0kInomjzMYFr50wA==
     - control_plane_name: oauth2-mtls-install
+    - is_production_deployment: false
   tasks:
     - name: Fail if client_id or client_secret is unset
       fail:
