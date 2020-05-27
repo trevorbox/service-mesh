@@ -47,10 +47,10 @@ spec:
         requests:
           cpu: 10m
           memory: 128Mi
-    {% if is_production_deployment %}
     tracing:
       enabled: true
       jaeger:
+{% if is_production_deployment %}      
         template: production-elasticsearch
         elasticsearch:
           nodeCount: 3
@@ -62,16 +62,13 @@ spec:
             limits:
               cpu: "1"
               memory: "16Gi"
-    {% else %}
-    tracing:
-      enabled: true
-      jaeger:
+{% else %}
         template: all-in-one
         resources:
           requests:
             cpu: 10m
             memory: 128Mi
-    {% endif %}
+{% endif %}
     gateways:
       istio-egressgateway:
         enabled: false
