@@ -24,12 +24,14 @@
 
     - name: Deploy Service Mesh Control Plane
       k8s:
+        apply: true
         state: present
         namespace: "{{ control_plane_namespace }}"
         definition: "{{ lookup('template', '{{ control_plane_src_dir }}/oauth2-gateway/templates/ServiceMeshControlPlaneOauth2Proxy.j2') }}"
 
     - name: Deploy Route
       k8s:
+        apply: true
         state: present
         namespace: "{{ control_plane_namespace }}"
         src: "{{ control_plane_src_dir }}/oauth2-gateway/APIRoute.yml"
@@ -42,6 +44,7 @@
 
     - name: Deploy common service mesh objects
       k8s:
+        apply: true
         state: present
         namespace: "{{ control_plane_namespace }}"
         src: "{{ item.path }}"
