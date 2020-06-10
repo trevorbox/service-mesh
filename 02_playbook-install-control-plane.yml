@@ -53,11 +53,3 @@
       retries: 10
       delay: 30
       ignore_errors: true
-
-    - name: Delete default http route istio-ingressgateway
-      k8s:
-        state: absent
-        namespace: "{{ control_plane_namespace }}"
-        kind: route
-        api_version: route.openshift.io/v1
-        name: istio-ingressgateway
