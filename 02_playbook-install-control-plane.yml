@@ -16,12 +16,14 @@
 
     - name: Deploy API Route
       k8s:
+        apply: true
         state: present
         namespace: "{{ control_plane_namespace }}"
         src: "{{ control_plane_src_dir }}/default-gateway/APIRoute.yml"
 
     - name: Deploy Service Mesh Control Plane
       k8s:
+        apply: true
         state: present
         namespace: "{{ control_plane_namespace }}"
         definition: "{{ lookup('template', '{{ control_plane_src_dir }}/default-gateway/templates/ServiceMeshControlPlane.j2') }}"
@@ -34,6 +36,7 @@
 
     - name: Deploy common service mesh objects
       k8s:
+        apply: true
         state: present
         namespace: "{{ control_plane_namespace }}"
         src: "{{ item.path }}"
@@ -50,11 +53,3 @@
       retries: 10
       delay: 30
       ignore_errors: true
-
-    - name: Delete default http route istio-ingressgateway
-      k8s:
-        state: absent
-        namespace: "{{ control_plane_namespace }}"
-        kind: route
-        api_version: route.openshift.io/v1
-        name: istio-ingressgateway

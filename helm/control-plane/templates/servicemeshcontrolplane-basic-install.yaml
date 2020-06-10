@@ -1,7 +1,9 @@
+
 apiVersion: maistra.io/v1
 kind: ServiceMeshControlPlane
 metadata:
-  name: {{ control_plane_name }}
+  name: {{ .Values.control_plane_name }}
+  namespace: {{ .Release.Namespace }}
 spec:
   version: v1.1
   istio:
@@ -10,7 +12,7 @@ spec:
         enabled: false
       istio-ingressgateway:
         enabled: false        
-      custom-ingressgateway:
+      {{ .Values.ingressgateway_name }}:
         enabled: true
         autoscaleEnabled: false
         ior_enabled: false
@@ -21,7 +23,7 @@ spec:
         sds:
           enabled: false
         labels:
-          app: custom-ingressgateway
+          app: {{ .Values.ingressgateway_name }}
           istio: ingressgateway
         type: ClusterIP
         ports:
@@ -86,7 +88,7 @@ spec:
     tracing:
       enabled: true
       jaeger:
-{% if is_production_deployment %}      
+{{ if .Values.is_production_deployment }}      
         template: production-elasticsearch
         elasticsearch:
           nodeCount: 3
@@ -98,10 +100,10 @@ spec:
             limits:
               cpu: "1"
               memory: "16Gi"
-{% else %}
+{{ else }}
         template: all-in-one
         resources:
           requests:
             cpu: 10m
             memory: 128Mi
-{% endif %}
+{{ end }}
