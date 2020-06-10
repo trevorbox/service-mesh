@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export deploy_namespace=myistio
+export deploy_namespace=istio-system
 export control_plane_name=basic-install
 export is_production_deployment=false
 export ingressgateway_name=custom-ingressgateway
