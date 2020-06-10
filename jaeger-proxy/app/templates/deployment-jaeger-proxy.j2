@@ -48,7 +48,7 @@ spec:
             - '--provider=openshift'
             - '--tls-cert=/etc/tls/private/tls.crt'
             - '--tls-key=/etc/tls/private/tls.key'
-            - '--upstream=http://jaeger-query:16686'
+            - '--upstream=http://jaeger-proxy-query:16686'
       serviceAccount: jaeger-proxy
       volumes:
         - name: configmap-trusted-ca-bundle
