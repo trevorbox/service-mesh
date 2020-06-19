@@ -12,10 +12,13 @@ spec:
     targetPort: 16686
   selector:
     app: jaeger
-    app.kubernetes.io/component: all-in-one
+{{- if and .Values.is_production_deployment }}
+{{ toYaml .Values.services.jaeger_proxy_query.selectors.prod | trim | indent 4 }}
+{{- else }}
+{{ toYaml .Values.services.jaeger_proxy_query.selectors.dev | trim | indent 4 }}
+{{- end }}
     app.kubernetes.io/instance: jaeger
     app.kubernetes.io/managed-by: jaeger-operator
-    app.kubernetes.io/name: jaeger
     app.kubernetes.io/part-of: jaeger
   sessionAffinity: None
   type: ClusterIP

@@ -1,0 +1,10 @@
+is_production_deployment: true
+services:
+  jaeger_proxy_query:
+    selectors:
+      prod:
+        app.kubernetes.io/component: query
+        app.kubernetes.io/name: jaeger-query
+      dev:
+        app.kubernetes.io/component: all-in-one
+        app.kubernetes.io/name: jaeger
