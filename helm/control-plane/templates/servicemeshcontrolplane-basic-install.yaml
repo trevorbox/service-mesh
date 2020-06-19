@@ -88,7 +88,7 @@ spec:
     tracing:
       enabled: true
       jaeger:
-{{ if .Values.is_production_deployment }}      
+{{- if .Values.is_production_deployment }}      
         template: production-elasticsearch
         elasticsearch:
           nodeCount: 3
@@ -100,10 +100,10 @@ spec:
             limits:
               cpu: "1"
               memory: "4Gi"
-{{ else }}
+{{- else }}
         template: all-in-one
         resources:
           requests:
             cpu: 10m
             memory: 128Mi
-{{ end }}
+{{- end }}
