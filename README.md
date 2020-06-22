@@ -1,70 +1,88 @@
-# Install Service Mesh Operators and create the Control Plane
+# Service Mesh Installation
 
-> mTLS enabled
+## Install the service mesh operators
 
-## Install Service Mesh Operators
+```sh
+helm install service-mesh-operators -n openshift-operators service-mesh-operators/
+```
 
-1. Ensure you are logged in
+Manually approve the InstallPlans within the *openshift-operators* namespace.
 
+1. Navigate the the InstallPlans search page
+  
    ```sh
-   oc login <mycluster>
+   echo "https://$(oc get route console -o jsonpath={.spec.host} -n openshift-console)/k8s/ns/openshift-operators/operators.coreos.com~v1alpha1~InstallPlan"
    ```
 
-2. Run the playbook
+2. Select each InstallPlan on the search page. Within each InstallPlan's Overview tab select the **Preview Install Plan** button, then select the **Approve** button on the Components tab.
+
+## Uninstall the service mesh operators
+
+1. Delete the helm chart release:
 
    ```sh
-   ansible-playbook 01_playbook-install-service-mesh-operators.yml
+   helm delete service-mesh-operators -n openshift-operators
    ```
 
-## Install Control Plane
+2. Follow the instructions from <https://docs.openshift.com/container-platform/4.3/service_mesh/service_mesh_install/removing-ossm.html>
 
-Choose whether to install the default control plane or oauth2 gateway control plane.
+## Install the control plane
 
-- Default Control Plane:
-  
-   1. Ensure you are logged in
+```sh
+export deploy_namespace=istio-system
 
-      ```sh
-      oc login <mycluster>
-      ```
+oc new-project ${deploy_namespace}
 
-   2. Update `control_plane_namespace` within *02_playbook-install-control-plane.yml* with desired project name to deploy too
-  
-   3. Run the playbook
+#Note: you may need to wait a moment for the operators to propagate
 
-      ```sh
-      ansible-playbook 02_playbook-install-control-plane.yml
-      ```
+helm install control-plane -n ${deploy_namespace} control-plane/
+```
 
-- Okta Oauth2 Proxy Gateway Control Plane:
-   1. Ensure you are logged in
+## Uninstall the control plane
 
-      ```sh
-      oc login <mycluster>
-      ```
+```sh
+export deploy_namespace=istio-system
+helm delete control-plane -n ${deploy_namespace}
+```
 
-   2. Update `control_plane_namespace` within *02_playbook-install-control-plane-oauth2-gateway.yml* with desired project name to deploy too
+## Install the oauth2 control plane
 
-   3. Follow the steps described within [Configuring the OIDC Provider with Okta](https://github.com/trevorbox/oauth2-proxy/blob/update-okta-doc/docs/2_auth.md#configuring-the-oidc-provider-with-okta) to create an Okta application & authorization server. Retrieve its `client_id` and `client_secret`.
+Follow the steps described within [Configuring the OIDC Provider with Okta](https://github.com/trevorbox/oauth2-proxy/blob/update-okta-doc/docs/2_auth.md#configuring-the-oidc-provider-with-okta) to create an Okta application & authorization server. Retrieve its `client_id` and `client_secret`.
 
-   4. Run the playbook while passing the `client_id` and `client_secret` vars
+Note that the Okta Application needs the login redirect URI to match the ${redirect_url} defined below.
 
-      ```sh
-      ansible-playbook 02_playbook-install-control-plane-oauth2-gateway.yml -e client_id=${my-client-id} -e client_secret=${my-client-secret}
-      ```
+```sh
+export deploy_namespace=istio-system
+export client_id=<my_client_id>
+export client_secret=<my_client_secret>
+export redirect_url="https://api-istio-system.$(oc get route console -o jsonpath={.status.ingress[0].routerCanonicalHostname} -n openshift-console)/oauth2/callback"
 
-- Production Deployment:
+oc new-project ${deploy_namespace}
 
-   1. Ensure you are logged in
+#Note: you may need to wait a moment for the operators to propagate
 
-      ```sh
-      oc login <mycluster>
-      ```
+helm install control-plane-oauth2 -n ${deploy_namespace} --set client_id=${client_id} --set client_secret=${client_secret} --set redirect_url=${redirect_url} control-plane-oauth2/
+```
 
-   2. Update `control_plane_namespace` within *02_playbook-install-control-plane.yml* with desired project name to deploy too
-  
-   3. Run the playbook
+## Uninstall the oauth2 control plane
 
-      ```sh
-      ansible-playbook 02_playbook-install-control-plane.yml -e is_production_deployment=true
-      ```
+```sh
+export deploy_namespace=istio-system
+helm delete control-plane-oauth2 -n ${deploy_namespace}
+```
+
+## Optional
+
+### Install the jaeger proxy (for bundled ca trust)
+
+```sh
+export deploy_namespace=istio-system
+helm install jaeger-proxy -n ${deploy_namespace} jaeger-proxy/
+```
+
+### Uninstall the jaeger proxy
+
+```sh
+export deploy_namespace=istio-system
+helm delete jaeger-proxy -n ${deploy_namespace}
+```
