@@ -49,16 +49,19 @@ helm delete control-plane -n ${deploy_namespace}
 
 Follow the steps described within [Configuring the OIDC Provider with Okta](https://github.com/trevorbox/oauth2-proxy/blob/update-okta-doc/docs/2_auth.md#configuring-the-oidc-provider-with-okta) to create an Okta application & authorization server. Retrieve its `client_id` and `client_secret`.
 
+Note that Okta needs the login redirect URI to match the ${redirect_url} defined below.
+
 ```sh
 export deploy_namespace=istio-system
 export client_id=<my_client_id>
 export client_secret=<my_client_secret>
+export redirect_url="https://api-istio-system.$(oc get route console -o jsonpath={.status.ingress[0].routerCanonicalHostname} -n openshift-console)/oauth2/callback"
 
 oc new-project ${deploy_namespace}
 
 #Note: you may need to wait a moment for the operators to propagate
 
-helm install control-plane-oauth2 -n ${deploy_namespace} --set client_id=${client_id} --set client_secret=${client_secret} control-plane-oauth2/
+helm install control-plane-oauth2 -n ${deploy_namespace} --set client_id=${client_id} --set client_secret=${client_secret} --set redirect_url=${redirect_url} control-plane-oauth2/
 ```
 
 ## Uninstall the oauth2 control plane

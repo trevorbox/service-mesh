@@ -4,11 +4,11 @@ metadata:
   name: api
 spec:
   port:
-    targetPort: http2
+    targetPort: oauth-http
   tls:
     termination: edge
   to:
     kind: Service
-    name: custom-ingressgateway
+    name: {{ .Values.ingressgateway_name }}
     weight: 100
   wildcardPolicy: None
