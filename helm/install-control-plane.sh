@@ -1,24 +1,14 @@
 #!/bin/bash
 
 export deploy_namespace=istio-system
-export control_plane_name=basic-install
-export is_production_deployment=false
-export ingressgateway_name=custom-ingressgateway
 
 oc new-project ${deploy_namespace}
 
-echo "Deploy control plane..."
+echo "Install control plane..."
 
-helm template control-plane -n ${deploy_namespace} \
-  --set control_plane_name=${control_plane_name} \
-  --set is_production_deployment=${is_production_deployment} \
-  --set ingressgateway_name=${ingressgateway_name} \
-  | oc apply -f -
+helm install control-plane -n ${deploy_namespace} control-plane/
 
-echo "Create Jaeger Proxy..."
-helm template jaeger-proxy -n ${deploy_namespace} | oc apply -f -
-
-echo "Wait for service mesh to finish deployment..."
+echo "Wait for control plane to finish deployment..."
 
 FAILURES=0
 RETRY=10

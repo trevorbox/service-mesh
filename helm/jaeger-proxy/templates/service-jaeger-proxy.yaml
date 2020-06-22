@@ -6,7 +6,6 @@ metadata:
   labels:
     app: jaeger-proxy
   name: jaeger-proxy
-  namespace: {{ .Release.Namespace }}
 spec:
   clusterIP: None
   ports:

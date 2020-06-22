@@ -4,7 +4,6 @@ metadata:
   labels:
     app: jaeger-proxy
   name: jaeger-proxy
-  namespace: {{ .Release.Namespace }}
 spec:
   tls:
     termination: reencrypt

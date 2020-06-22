@@ -3,7 +3,6 @@ apiVersion: maistra.io/v1
 kind: ServiceMeshControlPlane
 metadata:
   name: {{ .Values.control_plane_name }}
-  namespace: {{ .Release.Namespace }}
 spec:
   version: v1.1
   istio:
