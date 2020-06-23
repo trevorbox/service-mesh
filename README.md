@@ -71,6 +71,25 @@ export deploy_namespace=istio-system
 helm delete control-plane-oauth2 -n ${deploy_namespace}
 ```
 
+## Install the mongodb control plane
+
+```sh
+export deploy_namespace=istio-system
+
+oc new-project ${deploy_namespace}
+
+#Note: you may need to wait a moment for the operators to propagate
+
+helm install control-plane-mongodb -n ${deploy_namespace} control-plane-mongodb/
+```
+
+## Uninstall the mongodb control plane
+
+```sh
+export deploy_namespace=istio-system
+helm delete control-plane-mongodb -n ${deploy_namespace}
+```
+
 ## Optional
 
 ### Install the jaeger proxy (for bundled ca trust)

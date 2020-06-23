@@ -1,0 +1,4 @@
+control_plane_name: basic-install
+is_production_deployment: false
+ingressgateway_name: custom-ingressgateway
+mongo_ingressgateway_name: mongo-ingressgateway

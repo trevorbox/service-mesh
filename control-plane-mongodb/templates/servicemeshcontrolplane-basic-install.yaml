@@ -1,0 +1,108 @@
+apiVersion: maistra.io/v1
+kind: ServiceMeshControlPlane
+metadata:
+  name: {{ .Values.control_plane_name }}
+spec:
+  version: v1.1
+  istio:
+    gateways:
+      istio-egressgateway:
+        enabled: false
+      istio-ingressgateway:
+        enabled: false
+      {{ .Values.ingressgateway_name }}:
+        enabled: true
+        autoscaleEnabled: false
+        ior_enabled: false
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        sds:
+          enabled: false
+        labels:
+          app: {{ .Values.ingressgateway_name }}
+          istio: ingressgateway
+        type: ClusterIP
+        ports:
+          - name: status-port
+            protocol: TCP
+            port: 15020
+            targetPort: 15020
+          - name: http2
+            protocol: TCP
+            port: 80
+            targetPort: 8080
+          - name: https
+            protocol: TCP
+            port: 443
+            targetPort: 8443
+          - name: tls
+            protocol: TCP
+            port: 15443
+            targetPort: 15443
+      {{ .Values.mongo_ingressgateway_name }}:
+        enabled: true
+        ior_enabled: false
+        autoscaleEnabled: false
+        labels:
+          app: {{ .Values.mongo_ingressgateway_name }}
+          istio: {{ .Values.mongo_ingressgateway_name }}       
+        serviceAnnotations:
+          service.beta.openshift.io/serving-cert-secret-name: mongo-proxy-tls
+        type: LoadBalancer
+        ports:
+        - port: 27017
+          targetPort: 27017
+          name: mongo
+        - port: 27018
+          targetPort: 27018
+          name: mongo-tls
+        secretVolumes:
+        - name: ingressgateway-certs
+          secretName: istio-ingressgateway-certs
+          mountPath: /etc/istio/ingressgateway-certs
+        - name: ingressgateway-ca-certs
+          secretName: istio-ingressgateway-ca-certs
+          mountPath: /etc/istio/ingressgateway-ca-certs
+        - name: mongo-proxy-tls
+          secretName: mongo-proxy-tls
+          mountPath: /etc/mongo-proxy/certs
+    global:
+      outboundTrafficPolicy:
+        mode: ALLOW_ANY
+      controlPlaneSecurityEnabled: false
+      disablePolicyChecks: false
+      mtls:
+        enabled: false
+      proxy:
+        resources:
+          limits:
+            cpu: 500m
+            memory: 128Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+    grafana:
+      enabled: true
+    kiali:
+      enabled: true
+    mixer:
+      policy:
+        autoscaleEnabled: false
+      telemetry:
+        autoscaleEnabled: false
+        resources:
+          limits:
+            cpu: 500m
+            memory: 4G
+          requests:
+            cpu: 100m
+            memory: 1G
+    pilot:
+      autoscaleEnabled: false
+      traceSampling: 100
+    tracing:
+      enabled: true
+      jaeger:
+        template: all-in-one
