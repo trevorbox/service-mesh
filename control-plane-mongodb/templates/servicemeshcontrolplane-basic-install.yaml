@@ -7,7 +7,7 @@ spec:
   istio:
     gateways:
       istio-egressgateway:
-        enabled: false
+        enabled: {{ .Values.egressgateway_enabled }}
       istio-ingressgateway:
         enabled: false
       {{ .Values.ingressgateway_name }}:
