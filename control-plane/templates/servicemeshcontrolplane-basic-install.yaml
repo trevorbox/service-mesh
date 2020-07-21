@@ -14,7 +14,7 @@ spec:
       {{ .Values.ingressgateway_name }}:
         enabled: true
         autoscaleEnabled: false
-        ior_enabled: true
+        ior_enabled: false
         resources:
           requests:
             cpu: 100m
