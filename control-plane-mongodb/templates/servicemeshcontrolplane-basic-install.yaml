@@ -7,7 +7,43 @@ spec:
   istio:
     gateways:
       istio-egressgateway:
-        enabled: {{ .Values.egressgateway_enabled }}
+        enabled: {{ .Values.egressgateway_enabled }} 
+        autoscaleEnabled: false
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        labels:
+          app: istio-egressgateway
+          istio: egressgateway    
+        type: ClusterIP
+        ports:
+          #- name: http2
+          #  protocol: TCP
+          #  port: 80
+          #  targetPort: 8080
+          #- name: https
+          #  protocol: TCP
+          #  port: 443
+          #  targetPort: 8443
+          #- name: tls
+          #  protocol: TCP
+          #  port: 15443
+          #  targetPort: 15443
+          - name: mongo
+            protocol: TCP
+            port: 15666
+            targetPort: 15666
+        #secretVolumes:
+        #- name: istio-certs
+        #  secretName: istio.istio-egressgateway-service-account
+        #  mountPath: /etc/certs
+        #- name: egressgateway-certs
+        #  secretName: istio-egressgateway-certs
+        #  mountPath: /etc/istio/egressgateway-certs
+        #- name: egressgateway-ca-certs
+        # secretName: istio-egressgateway-ca-certs
+        #  mountPath: /etc/istio/egressgateway-ca-certs
       istio-ingressgateway:
         enabled: false
       {{ .Values.ingressgateway_name }}:
@@ -70,12 +106,13 @@ spec:
           mountPath: /etc/mongo-proxy/certs
     global:
       outboundTrafficPolicy:
-        mode: ALLOW_ANY
+        mode: REGISTRY_ONLY
       controlPlaneSecurityEnabled: false
       disablePolicyChecks: false
       mtls:
         enabled: false
       proxy:
+        accessLogFile: /dev/stdout
         resources:
           limits:
             cpu: 500m
