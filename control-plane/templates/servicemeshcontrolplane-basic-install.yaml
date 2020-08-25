@@ -99,6 +99,13 @@ spec:
             limits:
               cpu: "1"
               memory: "4Gi"
+          storage:
+            storageClassName: gp2
+            size: 50Gi
+          esIndexCleaner:
+            enabled: true            # turn the cron job deployment on and off
+            numberOfDays: 60         # number of days to wait before deleting a record
+            schedule: "55 23 * * *"  # cron expression for it to run
 {{- else }}
         template: all-in-one
         resources:
